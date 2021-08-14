@@ -43,7 +43,7 @@ class Author
     /**
      * @ORM\OneToMany(targetEntity=Book::class, mappedBy="author", orphanRemoval=true)
      */
-    private ?ArrayCollection $books;
+    private Collection $books;
 
     public function __construct()
     {

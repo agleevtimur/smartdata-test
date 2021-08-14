@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Entity\Author;
 use App\Repository\AuthorRepository;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -28,13 +29,13 @@ class AuthorController extends AbstractController
 
         $author = (new Author())
             ->setName($data['name'])
-            ->setBirthday($data['birthday'])
+            ->setBirthday(new DateTime($data['birthday']))
             ->setCountry($data['country'])
             ->setDescription($data['description']);
         $this->entityManager->persist($author);
         $this->entityManager->flush();
 
-        return $this->json(null);
+        return $this->json($author->getId());
     }
 
     public function read(int $id): JsonResponse
@@ -80,5 +81,35 @@ class AuthorController extends AbstractController
         $this->entityManager->flush();
 
         return $this->json(null);
+    }
+
+    public function getAllBookAuthor(): JsonResponse
+    {
+        $result = [];
+        $authors = $this->authorRepository->findAll();
+
+        foreach ($authors as $author) {
+            $authorInfo = [
+                'name' => $author->getName(),
+                'country' => $author->getCountry(),
+                'birthday' => $author->getBirthday(),
+                'description' => $author->getDescription()
+            ];
+
+            $books = $author->getBooks();
+            $booksInfo = [];
+
+            foreach ($books as $book) {
+                $booksInfo[] = [
+                    'title' => $book->getTitle(),
+                    'genre' => $book->getGenre(),
+                    'writingDate' => $book->getWritingDate(),
+                    'description' => $book->getDescription()
+                ];
+            }
+            $result[] = ['author' => $authorInfo, 'books' => $booksInfo];
+        }
+
+        return $this->json($result, 200, ['Access-Control-Allow-Origin' => '*']);
     }
 }

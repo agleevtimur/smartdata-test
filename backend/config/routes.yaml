@@ -30,7 +30,12 @@ bookUpdate:
   path: /api/v1/books/update
   methods: POST
   controller: App\Controller\BookController::update
-bookDelete
+bookDelete:
   path: /api/v1/books/{id}
   methods: DELETE
   controller: App\Controller\BookController::delete
+
+getAllBookAuthor:
+  path: /api/v1/all
+  methods: GET
+  controller: App\Controller\AuthorController::getAllBookAuthor

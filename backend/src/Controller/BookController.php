@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\Book;
 use App\Repository\AuthorRepository;
 use App\Repository\BookRepository;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -38,13 +39,13 @@ class BookController extends AbstractController
             ->setAuthor($author)
             ->setTitle($data['title'])
             ->setGenre($data['genre'])
-            ->setWritingDate($data['date'])
+            ->setWritingDate(new DateTime($data['writingDate']))
             ->setDescription($data['description']);
 
         $this->entityManager->persist($book);
         $this->entityManager->flush();
 
-        return $this->json(null);
+        return $this->json($book->getId());
     }
 
     public function read(int $id): JsonResponse
