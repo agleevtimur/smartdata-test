@@ -5,10 +5,9 @@ import BooksListFormat from "./BooksListFormat";
 import "antd/dist/antd.css";
 
 const {Header, Content} = Layout;
-const BOOKS_LIST_URL = 'http://localhost:8000/api/v1/all';
+const BOOKS_LIST_URL = 'http://localhost:8000/public/api/v1/all';
 
-const noBooksMessage = () => <div style={{padding: "40px 0", textAlign: "center", fontSize: "28px"}}>'No books available
-    :('</div>;
+const noBooksMessage = () => <div style={{padding: "40px 0", textAlign: "center", fontSize: "28px"}}>'No books available :('</div>;
 
 function App() {
     const [data, setData] = useState([]);

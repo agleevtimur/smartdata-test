@@ -5,11 +5,12 @@ namespace App\Entity;
 use App\Repository\BookRepository;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
+use JsonSerializable;
 
 /**
  * @ORM\Entity(repositoryClass=BookRepository::class)
  */
-class Book
+class Book implements JsonSerializable
 {
     /**
      * @ORM\Id
@@ -107,5 +108,15 @@ class Book
         $this->author = $author;
 
         return $this;
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'title' => $this->title,
+            'writingDate' => $this->writingDate,
+            'genre' => $this->genre,
+            'description' => $this->description
+        ];
     }
 }

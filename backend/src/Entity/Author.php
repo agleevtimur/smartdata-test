@@ -7,11 +7,12 @@ use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use JsonSerializable;
 
 /**
  * @ORM\Entity(repositoryClass=AuthorRepository::class)
  */
-class Author
+class Author implements JsonSerializable
 {
     /**
      * @ORM\Id
@@ -109,5 +110,15 @@ class Author
     public function getBooks(): ?Collection
     {
         return $this->books;
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'name' => $this->name,
+            'birthday' => $this->birthday,
+            'country' => $this->country,
+            'description' => $this->description
+        ];
     }
 }

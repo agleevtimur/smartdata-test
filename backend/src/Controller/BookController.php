@@ -13,7 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-class BookController extends AbstractController
+class BookController extends AbstractController implements TokenAuthenticatedController
 {
     private EntityManagerInterface $entityManager;
     private AuthorRepository $authorRepository;
@@ -62,18 +62,23 @@ class BookController extends AbstractController
     public function update(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        $book = $this->bookRepository->find($data['bookId']);
+        $book = $this->bookRepository->find($data['id']);
 
         if ($book === null) {
             return $this->json(['error' => 'book not found'], 500);
         }
 
+        $author = $this->authorRepository->find($data['authorId']);
+        if ($author === null) {
+            return $this->json(['error' => 'book not found'], 500);
+        }
+
         $this->entityManager->persist($book);
         $book
-            ->setAuthor($data['authorId'])
+            ->setAuthor($author)
             ->setTitle($data['title'])
             ->setGenre($data['genre'])
-            ->setWritingDate($data['writingDate'])
+            ->setWritingDate(new DateTime($data['writingDate']))
             ->setDescription($data['description']);
         $this->entityManager->flush();
 
@@ -92,5 +97,13 @@ class BookController extends AbstractController
         $this->entityManager->flush();
 
         return $this->json(null);
+    }
+
+    public function getAllWithAuthorName(): JsonResponse
+    {
+        $books = $this->bookRepository->findAll();
+        $result = array_map(fn($book) => ['book' => $book, 'authorName' => $book->getAuthor()->getName()], $books);
+
+        return $this->json($result);
     }
 }

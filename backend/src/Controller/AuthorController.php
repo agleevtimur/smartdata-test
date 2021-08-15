@@ -12,7 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-class AuthorController extends AbstractController
+class AuthorController extends AbstractController implements TokenAuthenticatedController
 {
     private EntityManagerInterface $entityManager;
     private AuthorRepository $authorRepository;
@@ -52,7 +52,7 @@ class AuthorController extends AbstractController
     public function update(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        $author = $this->authorRepository->find($data['authorId']);
+        $author = $this->authorRepository->find($data['id']);
 
         if ($author === null) {
             return $this->json(['error' => 'author not found'], 500);
@@ -62,7 +62,7 @@ class AuthorController extends AbstractController
         $author
             ->setName($data['name'])
             ->setCountry($data['country'])
-            ->setBirthday($data['birthday'])
+            ->setBirthday(new DateTime($data['birthday']))
             ->setDescription($data['description']);
         $this->entityManager->flush();
 
@@ -83,33 +83,11 @@ class AuthorController extends AbstractController
         return $this->json(null);
     }
 
-    public function getAllBookAuthor(): JsonResponse
+    public function getAllWithBookCount(): JsonResponse
     {
-        $result = [];
         $authors = $this->authorRepository->findAll();
+        $result = array_map(fn($author) => ['author' => $author, 'bookCount' => $author->getBooks()->count()], $authors);
 
-        foreach ($authors as $author) {
-            $authorInfo = [
-                'name' => $author->getName(),
-                'country' => $author->getCountry(),
-                'birthday' => $author->getBirthday(),
-                'description' => $author->getDescription()
-            ];
-
-            $books = $author->getBooks();
-            $booksInfo = [];
-
-            foreach ($books as $book) {
-                $booksInfo[] = [
-                    'title' => $book->getTitle(),
-                    'genre' => $book->getGenre(),
-                    'writingDate' => $book->getWritingDate(),
-                    'description' => $book->getDescription()
-                ];
-            }
-            $result[] = ['author' => $authorInfo, 'books' => $booksInfo];
-        }
-
-        return $this->json($result, 200, ['Access-Control-Allow-Origin' => '*']);
+        return $this->json($result);
     }
 }
